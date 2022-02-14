@@ -17,7 +17,7 @@ def initialise_clients(clientname, user, Password):
     # callback assignment
     initialise_client = mqtt.Client(clientname, False)  # don't use clean session
     initialise_client.username_pw_set(user, Password)
-
+    # initialise_client.tls_set(cert_reqs=ssl.CERT_NONE)
 
     initialise_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
                               tls_version=ssl.PROTOCOL_TLS,
@@ -99,7 +99,7 @@ if __name__ == '__main__':
     host = "mr2xg4fgthgmv.messaging.solace.cloud"
     port = 8883
     username = "solace-cloud-client"
-    password = "rmos9bagc51fv70u1ejk7l6rt28"
+    password = "mos9bagc51fv70u1ejk7l6rt28"
     topic = "mqtt/sub"
     client = initialise_clients("client1", username, password)
     # client.on_connect = on_connect
