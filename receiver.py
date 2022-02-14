@@ -1,23 +1,32 @@
 #!/usr/bin/env python
+#coding:utf-8
 # license removed for brevity
+import ssl
 import rospy
 from std_msgs.msg import String
 import paho.mqtt.client as mqtt
-import time
-import numpy as np
-from paho.mqtt.client import ssl
-import sys
-  
-  
-receiveMessanges = []
+
+def ros_pub(data):
+    global publisher, rate
+
+    publisher.publish(data)     #將date字串發布到topic
+    rate.sleep();
+    print(f"publish data {data}")
+
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code " + str(rc))
+    client.subscribe(topic)
 
 
+def on_message(client, userdata, msg):
+    # print(f"got {msg.payload.decode('utf-8')}")
+    ros_pub(msg.payload.decode('utf-8'))
 
-def initialise_clients(clientname, user, Password):
+
+def initialise_clients(cname, user, Password):
     # callback assignment
-    initialise_client = mqtt.Client(clientname, False)  # don't use clean session
+    initialise_client = mqtt.Client(cname, False)  # don't use clean session
     initialise_client.username_pw_set(user, Password)
-    # initialise_client.tls_set(cert_reqs=ssl.CERT_NONE)
 
     initialise_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
                               tls_version=ssl.PROTOCOL_TLS,
@@ -25,69 +34,37 @@ def initialise_clients(clientname, user, Password):
     initialise_client.tls_insecure_set(True)
     return initialise_client
 
-def MQTT_Pub(pub_topic, msg, WaitForAck=True):
-    Pubmsg = f"Confirm Order: {msg}"
-    mid = client.publish(pub_topic, Pubmsg, qos=1)[1]
-    if WaitForAck:
-        if mid not in receiveMessanges:
-            print("wait ack")
-    # if status[1] == 15:
-    #     client.disconnect()
-    # print(f"result:{status}")
-    # print(f"Send back the Order{status[1]} was already Confirm")
+# initialize Ros node
+topicName = 'phone_msg'
+publisher = rospy.Publisher(topicName,String,queue_size=10)
+rate = rospy.Rate(10)
 
-def on_connect(client, userdata, flags, rc):
-    print("Connected with result code " + str(rc))
-    MQTT_Pub(topic, "ack", True)
+host = "mr2xg4fgthgmv.messaging.solace.cloud"
+port = 8883
+username = "solace-cloud-client"
+password = "mos9bagc51fv70u1ejk7l6rt28"
+topic = "mqtt/pub"
 
-def on_disconnect(client, userdata, rc):
-    print("dissconnect")
+Mqtt_Node = 'publisher_py'
+rospy.init_node(Mqtt_Node)
 
-def on_publish(self, userdata, mid):
-    print("ack")
-    receiveMessanges.append(mid)
+client = initialise_clients("python_sub", username, password)
 
-    
+client.on_connect = on_connect
 
+client.on_message = on_message
 
-# ROS
-def chatter_callback(message):
-    #get_caller_id(): Get fully resolved name of local node
-    rospy.loginfo(rospy.get_caller_id() + "I heard %s", message.data)   
-    MQTT_Pub(topic, message.data)
-    
-def listener():
+client.connect(host, port, 60)
 
-    # In ROS, nodes are uniquely named. If two nodes with the same
-    # node are launched, the previous one is kicked off. The
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'listener' node so that multiple listeners can
-    # run simultaneously.
-    rospy.init_node('listener', anonymous=True)
+client.loop_forever()
 
-    rospy.Subscriber("phone_msg", String, chatter_callback)
-
-    # spin() simply keeps python from exiting until this node is stopped
-    rospy.spin()
+# mqtt connect code list
+# 0: Connection successful
+# 1: Connection refused – incorrect protocol version
+# 2: Connection refused – invalid client identifier
+# 3: Connection refused – server unavailable
+# 4: Connection refused – bad username or password
+# 5: Connection refused – not authorised
+# 6-255: Currently unused.
 
 
-
-
-
-
-
-
-
-
-if __name__ == '__main__':
-    host = "mrf7613cpe6j8.messaging.solace.cloud"
-    port = 8883
-    username = "solace-cloud-client"
-    password = "rd9h3fudcut4j35fvu8938lq1rlab606"
-    topic = "mqtt/sub"
-    client = initialise_clients("client1", username, password)
-    client.connect(host, port, 60)
-    client.on_connect = on_connect
-    client.on_disconnect = on_disconnect
-    client.loop_start()
-    listener()
