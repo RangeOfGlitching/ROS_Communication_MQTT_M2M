@@ -17,7 +17,7 @@ def initialise_clients(clientname, user, Password):
     # callback assignment
     initialise_client = mqtt.Client(clientname, False)  # don't use clean session
     initialise_client.username_pw_set(user, Password)
-    # initialise_client.tls_set(cert_reqs=ssl.CERT_NONE)
+
 
     initialise_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
                               tls_version=ssl.PROTOCOL_TLS,
