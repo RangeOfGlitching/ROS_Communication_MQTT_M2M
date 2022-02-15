@@ -19,13 +19,13 @@ def on_connect(client, userdata, flags, rc):
 
 
 def on_message(client, userdata, msg):
-    # print(f"got {msg.payload.decode('utf-8')}")
+    print(f"got {msg.payload.decode('utf-8')}")
     ros_pub(msg.payload.decode('utf-8'))
 
 
 def initialise_clients(cname, user, Password):
     # callback assignment
-    initialise_client = mqtt.Client(cname, False)  # don't use clean session
+    initialise_client = mqtt.Client(cname, True)  # don't use clean session
     initialise_client.username_pw_set(user, Password)
 
     initialise_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
@@ -34,10 +34,6 @@ def initialise_clients(cname, user, Password):
     initialise_client.tls_insecure_set(True)
     return initialise_client
 
-# initialize Ros node
-topicName = 'phone_msg'
-publisher = rospy.Publisher(topicName,String,queue_size=10)
-rate = rospy.Rate(10)
 
 host = "mr2xg4fgthgmv.messaging.solace.cloud"
 port = 8883
@@ -47,6 +43,10 @@ topic = "mqtt/pub"
 
 Mqtt_Node = 'publisher_py'
 rospy.init_node(Mqtt_Node)
+# initialize Ros node
+topicName = 'phone_msg'
+publisher = rospy.Publisher(topicName,String,queue_size=10)
+rate = rospy.Rate(10)
 
 client = initialise_clients("python_sub", username, password)
 
@@ -66,5 +66,4 @@ client.loop_forever()
 # 4: Connection refused – bad username or password
 # 5: Connection refused – not authorised
 # 6-255: Currently unused.
-
 
