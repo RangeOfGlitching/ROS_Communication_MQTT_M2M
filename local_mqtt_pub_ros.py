@@ -77,9 +77,9 @@ if __name__ == '__main__':
     # Mqtt
     mqtt_config = {"host": "192.168.50.180", "port": 1883, "topic": "data/pub"}
     client = initialise_clients("client1")
-    client.connect(mqtt_config["host"], mqtt_config["port"], 60)
     client.on_publish = on_publish
     client.on_connect = on_connect
+    client.connect(mqtt_config["host"], mqtt_config["port"], 60)
     client.loop_start()
 
     # Ros
