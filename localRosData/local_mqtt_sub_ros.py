@@ -18,7 +18,7 @@ def ros_pub(dataJson):
 
 
 # MQTT
-def initialise_clients(cname):
+def initialise_clients(clientname):
     # callback assignment
     initialise_client = mqtt.Client(clientname, False) 
     initialise_client.topic_ack = []
@@ -26,7 +26,7 @@ def initialise_clients(cname):
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
-    client.subscribe(topic)
+    client.subscribe(mqtt_config["topic"])
 
 
 def on_message(client, userdata, msg):
@@ -35,10 +35,9 @@ def on_message(client, userdata, msg):
 
 if __name__ == '__main__':
     # Mqtt
-    mqtt_config = {"host": "192.168.50.180", "port": 1883, "topic": "data/pub"}"
+    mqtt_config = {"host": "127.0.0.1", "port": 1883, "topic": "data/pub"}
     client = initialise_clients("client1")
-    client.on_publish = on_publish
-    client.on_connect = on_connec
+    client.on_connect = on_connect
     client.connect(mqtt_config["host"], mqtt_config["port"], 60)
     client.loop_start()
 
