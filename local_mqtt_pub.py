@@ -12,7 +12,7 @@ def on_connect(self, userdata, flags, rc):
 
 def initialise_clients(cname):
     # callback assignment
-    def initialise_clients(clientname, user, Password):
+    initialise_client = mqtt.Client(clientname, False) 
     initialise_client.topic_ack = []
     return initialise_client
 
