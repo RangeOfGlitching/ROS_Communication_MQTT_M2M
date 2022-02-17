@@ -26,8 +26,8 @@ def callBack_imu(IMU):
     accel_y=str(IMU.angular_velocity.y)
     accel_z=str(IMU.angular_velocity.z)
 
-    data = {"gyro_x": gyro_x, "gyro_y": gyro_y,"gyro_z":gyro_z, "accel_x": accel_x, "accel_y": accel_y, "accel_z": accel_z}
-    jsonData = json.dump(data)
+    dataImuUpdate = {"gyro_x": gyro_x, "gyro_y": gyro_y,"gyro_z":gyro_z, "accel_x": accel_x, "accel_y": accel_y, "accel_z": accel_z}
+    data.update(dataImuUpdate)
     # print ('gyro_x:'+gyro_x+'\n'+'gyro_y:'+gyro_y+'\n'+'gyro_z:'+gyro_z +'\n')
     # print ('accel_x:'+accel_x+'\n'+'accel_y:'+accel_y+'\n'+'accel_z:'+accel_z +'\n')
 
@@ -43,8 +43,9 @@ def callBack_gps(GPS):
 def callBack_rng(RNG):
     dataRngUpdate = {"range": RNG.range}
     data.update(dataRngUpdate)
-    dataJsonFormate = data.dumps(data)
+    dataJsonFormate = json.dumps(data)
     # print ('range:'+range+'\n')
+    print (dataJsonFormate)
     mqtt_Pub(message=dataJsonFormate)
 
 
@@ -61,14 +62,14 @@ def mqtt_Pub(message, topics = mqtt_config["topic"], waitForAck=False):
     mid = client.publish(topics, message, 0)[1]
     # print(f"just published {message} to topic")
     if waitForAck:
-        while mid not in client.top_ack:
+        while mid not in client.topic_ack:
             print("wait for ack")
             time.sleep(0.25)
-        client.top_ack.remove(mid)
+        client.topic_ack.remove(mid)
 
 
 def on_publish(self, userdata, mid):
-    client.top_ack.append(mid)
+    client.topic_ack.append(mid)
 
 def on_connect(self, userdata, flags, rc):
     print("Connected with result code " + str(rc))
