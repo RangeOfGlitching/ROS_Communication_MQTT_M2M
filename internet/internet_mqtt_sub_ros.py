@@ -1,62 +1,55 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #coding:utf-8
 # license removed for brevity
 import ssl
 import rospy
 from std_msgs.msg import String
 import paho.mqtt.client as mqtt
+import json
 
-def ros_pub(data):
+mqtt_config = {"host": "192.168.0.48", "port": 1883, "topic": "data/pub"}
+# Ros
+def ros_pub(dataJson):
     global publisher, rate
+    # data = json.loads(dataJson)
+    publisher.publish(dataJson)     #將date字串發布到topic
+    rate.sleep()
+    # print(f"publish data {data}")
 
-    publisher.publish(data)     #將date字串發布到topic
-    rate.sleep();
-    print(f"publish data {data}")
+
+# MQTT
+def initialise_clients(clientname):
+    # callback assignment
+    initialise_client = mqtt.Client(clientname, False) 
+    initialise_client.topic_ack = []
+    return initialise_client
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
-    client.subscribe(topic)
+    client.subscribe(mqtt_config["topic"])
 
 
 def on_message(client, userdata, msg):
-    print(f"got {msg.payload.decode('utf-8')}")
+    print(msg.payload.decode('utf-8'))
     ros_pub(msg.payload.decode('utf-8'))
 
+if __name__ == '__main__':
+    # Mqtt
+    client = initialise_clients("nano")
+    client.on_connect = on_connect
+    client.on_message = on_message
+    client.connect(mqtt_config["host"], mqtt_config["port"], 60)
+    # client.loop_start()
 
-def initialise_clients(cname, user, Password):
-    # callback assignment
-    initialise_client = mqtt.Client(cname, True)  # don't use clean session
-    initialise_client.username_pw_set(user, Password)
+    # Ros
+    Mqtt_Node = 'publisher_py'
+    rospy.init_node(Mqtt_Node)
+    # initialize Ros node
+    topicName = 'mqtt_msg'
+    publisher = rospy.Publisher(topicName,String,queue_size=10)
+    rate = rospy.Rate(10)
 
-    initialise_client.tls_set(ca_certs=None, certfile=None, keyfile=None, cert_reqs=ssl.CERT_REQUIRED,
-                              tls_version=ssl.PROTOCOL_TLS,
-                              ciphers=None)
-    initialise_client.tls_insecure_set(True)
-    return initialise_client
-
-
-host = "mr2xg4fgthgmv.messaging.solace.cloud"
-port = 8883
-username = "solace-cloud-client"
-password = "mos9bagc51fv70u1ejk7l6rt28"
-topic = "mqtt/pub"
-
-Mqtt_Node = 'publisher_py'
-rospy.init_node(Mqtt_Node)
-# initialize Ros node
-topicName = 'phone_msg'
-publisher = rospy.Publisher(topicName,String,queue_size=10)
-rate = rospy.Rate(10)
-
-client = initialise_clients("python_sub", username, password)
-
-client.on_connect = on_connect
-
-client.on_message = on_message
-
-client.connect(host, port, 60)
-
-client.loop_forever()
+    client.loop_forever()
 
 # mqtt connect code list
 # 0: Connection successful
@@ -66,4 +59,3 @@ client.loop_forever()
 # 4: Connection refused – bad username or password
 # 5: Connection refused – not authorised
 # 6-255: Currently unused.
-
