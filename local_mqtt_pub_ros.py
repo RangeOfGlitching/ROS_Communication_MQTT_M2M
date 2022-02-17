@@ -79,7 +79,7 @@ if __name__ == '__main__':
     client = initialise_clients("client1")
     client.connect(mqtt_config["host"], mqtt_config["port"], 60)
     client.on_publish = on_publish
-    client.on_connect = on_connec
+    client.on_connect = on_connect
     client.loop_start()
 
     # Ros
