@@ -5,12 +5,13 @@ import numpy as np
 
 
 
+
 def on_connect(self, userdata, flags, rc):
     # print("Connected with result code " + str(rc))
     pass
 
 
-def initialise_clients(cname):
+def initialise_clients(clientname):
     # callback assignment
     initialise_client = mqtt.Client(clientname, False) 
     initialise_client.topic_ack = []
@@ -22,18 +23,18 @@ def publish(topics, message, waitForAck=False):
     mid = client.publish(topics, message, 2)[1]
     print(f"just published {message} to topic")
     if waitForAck:
-        while mid not in client.top_ack:
+        while mid not in client.topic_ack:
             print("wait for ack")
             time.sleep(0.25)
-        client.top_ack.remove(mid)
+        client.topic_ack.remove(mid)
 
 
 def on_publish(self, userdata, mid):
     print("ack")
-    client.top_ack.append(mid)
+    client.topic_ack.append(mid)
 
 
-host = "192.168.50.180"
+host = "192.168.1.110"
 port = 1883
 
 topic = "mqtt/pub"
