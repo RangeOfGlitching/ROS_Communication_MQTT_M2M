@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 #coding:utf-8
 import sys
-import json
+# import json
+import ujson
 import paho.mqtt.client as mqtt
 
 
@@ -43,12 +44,14 @@ def callBack_gps(GPS):
 def callBack_rng(RNG):
     dataRngUpdate = {"range": RNG.range}
     data.update(dataRngUpdate)
-    dataJsonFormate = json.dumps(data)
+#     dataJsonFormate = json.dumps(data)
+    dataJsonFormate = ujson.dumps(data)
     # print ('range:'+range+'\n')
     
 
 def toJson(data):
-    dataJsonFormate = json.dumps(data)
+#     dataJsonFormate = json.dumps(data)
+    dataJsonFormate = ujson.dumps(data)
     print (dataJsonFormate)
     mqtt_Pub(message=dataJsonFormate)
 
