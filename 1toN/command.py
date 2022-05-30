@@ -1,7 +1,6 @@
-# #!/usr/bin/env python3
-# #coding:utf-8
-# license removed for brevity
-import paho.mqtt.client as mqtt
+#! /usr/bin/env python3
+#coding:utf-8
+
 import ssl
 import rospy
 from std_msgs.msg import String
@@ -24,7 +23,7 @@ def on_connect(self, userdata, flags, rc):
 
 
 def on_message(self, userdata, msg):
-    msg = msg.payload.decode('utf-8')
+    #msg = msg.payload.decode('utf-8')
     print(f"msg.topic {msg}")
     ros_pub(msg.payload.decode('utf-8'))
 
@@ -48,9 +47,8 @@ if __name__ == '__main__':
     Mqtt_Node = 'publisher_py'
     rospy.init_node("cmd_receiver")
     # initialize Ros node
-    topicName = 'uav_command'
+    topicName = 'cmd_receiver'
     publisher = rospy.Publisher(topicName,String,queue_size=10)
     rate = rospy.Rate(10)
 
     client.loop_forever()
-
