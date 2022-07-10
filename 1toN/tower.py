@@ -1,28 +1,29 @@
 import paho.mqtt.client as mqtt
 import time
-import numpy as np
 
 
 def on_connect(self, userdata, flags, rc):
-    # print("Connected with result code " + str(rc))
-    client.subscribe(topicAck)
-    pass
+    global connect_flag
+    print("Connected with result code " + str(rc))
+    connect_flag = True
 
 
-def on_message(self, userdata, msg):
-    print(f"msg.topic {msg.payload.decode('utf-8')}")
+# def on_message(self, userdata, msg):
+# print(f"Receive UAV_Z550 {msg.payload.decode('utf-8')}")
+# print(f"Receive UAV_H380 {msg.payload.decode('utf-8')}")
+# print("command: ", end="")
 
 
 def initialise_clients(clientName):
     # callback assignment
-    initialise_client = mqtt.Client(clientName, False)
+    initialise_client = mqtt.Client(clientName, True)
     initialise_client.topic_ack = []
     return initialise_client
 
 
 # publish a message
 def publish(topics, message, waitForAck=False):
-    mid = client.publish(topics, message, 2)[1]
+    mid = client.publish(topics, message, 1)[1]
     print(f"just published {message} to topic")
     if waitForAck:
         while mid not in client.topic_ack:
@@ -32,31 +33,22 @@ def publish(topics, message, waitForAck=False):
 
 
 def on_publish(self, userdata, mid):
-    print("ack")
     client.topic_ack.append(mid)
 
 
-host = "192.168.50.149"
-port = 1883
-
-topicBroadcast = "mqtt/startUp3to1"
-
-topicAck = "mqtt/topicAck3to1"
-
-client = initialise_clients("client1")
-
-client.on_connect = on_connect
-
-client.connect(host, port, 60)
-
+connect_flag = False
+mqtt_config = {"host": "192.168.50.81", "port": 1883, "topic": "cmd/broadcast", "name": "Tower"}
+client = initialise_clients(mqtt_config["name"])
 client.on_publish = on_publish
+client.on_connect = on_connect
+# client.on_message = on_message
 
-client.on_message = on_message
-
+client.connect(mqtt_config["host"], mqtt_config["port"], 60)
 client.loop_start()
-#
+
 # publish(topicBroadcast, "Connect", True)
-count = 0
-while True:
-    command = input("command: ")
-    publish(topicBroadcast, command)
+
+if connect_flag:
+    while True:
+        command = input("command: ")
+        publish(mqtt_config["topic"], command)
