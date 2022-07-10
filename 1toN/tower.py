@@ -47,8 +47,10 @@ client.connect(mqtt_config["host"], mqtt_config["port"], 60)
 client.loop_start()
 
 # publish(topicBroadcast, "Connect", True)
-
-if connect_flag:
-    while True:
-        command = input("command: ")
-        publish(mqtt_config["topic"], command)
+while True:
+    if connect_flag:
+        break
+        
+while True:
+    command = input("command: ")
+    publish(mqtt_config["topic"], command)
